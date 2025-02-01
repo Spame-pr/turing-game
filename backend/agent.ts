@@ -13,7 +13,10 @@ export default class Agent {
       apiKey: OPENAI_API_KEY
     });
     this.playerId = playerId;
-    this.systemPrompt = `${systemPrompt}. Your player name/id is ${this.playerId}. The tools represent you responding or not, so do not call the same tool several times in a row - others will see you as a bot!`;
+    this.systemPrompt = `${systemPrompt}. Your player name/id is ${this.playerId}.\n
+    The tools represent you responding or not, so do not call the same tool several times in a row - others will see you as a bot!\n
+    Do not reply to your own messages.\n
+    `;
   }
 
   getPlayerId(): string {
