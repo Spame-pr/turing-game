@@ -44,7 +44,7 @@ const seedNames = (numberOfNames: number) => {
   return selected;
 }
 
-const MAX_PLAYERS = 1;
+const MAX_PLAYERS = 2;
 const BOT_NUMBER = 2;
 const SESSION_LENGTH_MS = 60 * 2 * 1000;
 
