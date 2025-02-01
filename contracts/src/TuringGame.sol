@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-contract TuringGame {
-    uint256 public number;
+import "./interfaces/ITuringGame.sol";
 
-    function setNumber(uint256 newNumber) public {
-        number = newNumber;
-    }
+contract TuringGame is ITuringGame {
+    uint32 private nextGameID;
+    mapping(uint32 => Game) private games;
 
-    function increment() public {
-        number++;
-    }
+    address public constant TURING_TOKEN = address(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
+    address public constant WETH = address(0x4200000000000000000000000000000000000006);
+
+
 }
