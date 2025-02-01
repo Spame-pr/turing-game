@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity 0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -7,11 +7,12 @@ import "./interfaces/ITuringGame.sol";
 
 contract TuringGame is ITuringGame, Ownable {
     uint256 public minTuringBalance = 1 ether;
+    uint256 public accumulatedFees;
 
     uint32 private nextGameID;
-    mapping(uint32 => Game) private games;
+    mapping(uint32 => Game) public games;
 
-    address public constant TURING_TOKEN = address(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
+    address public constant TURING_TOKEN = address(0x6Ee6e27a965d5566970dCfA347fB75A8C386E2e7);
     address public constant WETH = address(0x4200000000000000000000000000000000000006);
     uint128 public constant MIN_BET = 0.001 ether;
 
@@ -32,7 +33,7 @@ contract TuringGame is ITuringGame, Ownable {
         game.id = _currentID;
         game.bet = bet;
         game.deadline = 0;
-        game.player1 = PlayerData(msg.sender,false, 0, false);
+        game.player1 = PlayerData(msg.sender, false, 0, false);
 
         emit GameCreated(_currentID, msg.sender, bet);
 
@@ -46,16 +47,15 @@ contract TuringGame is ITuringGame, Ownable {
         if (game.player2.addr != address(0)) revert GameStarted();
         if (game.bet != msg.value) revert IncorrectBet();
 
-        game.player2 = PlayerData(msg.sender,false, 0,false);
+        game.player2 = PlayerData(msg.sender, false, 0, false);
         game.deadline = block.timestamp + 3 minutes;
 
         emit Joined(gameId, msg.sender);
     }
 
     function vote(uint32 gameId, uint8 guessId) public {
-        if (block.timestamp > games[gameId].deadline) revert GameEnded();
         Game storage game = games[gameId];
-
+        _validateVote(game);
 
         if (game.player1.addr == msg.sender) {
             game.player1.guessId = guessId;
@@ -68,10 +68,10 @@ contract TuringGame is ITuringGame, Ownable {
         emit Vote(gameId, guessId);
     }
 
-    function validate(uint32 gameId, uint8 player1, uint8 player2, uint256 adminExcess) onlyOwner public {
+    function validateVotes(uint32 gameId, uint8 player1, uint8 player2, uint256 adminExcess) onlyOwner public {
         Game storage game = games[gameId];
 
-        if(game.deadline < block.timestamp && (!game.player1.voted || !game.player2.voted)) revert GameInProgress();
+        if (game.deadline < block.timestamp && (!game.player1.voted || !game.player2.voted)) revert GameInProgress();
 
         game.player1.guessed = game.player1.guessId == player2;
         game.player2.guessed = game.player2.guessId == player1;
@@ -91,10 +91,18 @@ contract TuringGame is ITuringGame, Ownable {
         } else if (game.player2.guessed) {
             _sendEth(game.player2.addr, totalGameBet);
         } else {
-            //Buy token
+            accumulatedFees += totalGameBet;
+            _sendEth(owner(), totalGameBet);
         }
 
-        emit GameValidated(gameId);
+        emit GameValidated(gameId, game.player1.guessed, game.player2.guessed);
+    }
+
+    function _validateVote(Game storage game) private view {
+        if (block.timestamp > game.deadline) revert GameEnded();
+        if (game.player1.addr != address(0) && game.player2.addr != address(0) && msg.sender != game.player1.addr && msg.sender != game.player2.addr) revert NotGamePlayer();
+        if (msg.sender == game.player1.addr && game.player1.voted) revert AlreadyVoted();
+        if (msg.sender == game.player2.addr && game.player2.voted) revert AlreadyVoted();
     }
 
     function _checkTuringBalance() private view {

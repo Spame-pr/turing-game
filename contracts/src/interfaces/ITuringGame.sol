@@ -25,11 +25,13 @@ interface ITuringGame {
     error AlreadyInGame();
     error GameStarted();
     error GameEnded();
+    error NotGamePlayer();
     error GameInProgress();
+    error AlreadyVoted();
     error FailedEthSend();
 
     event GameCreated(uint32 indexed gameId, address creator, uint256 bet);
     event Joined(uint32 indexed gameId, address joiner);
     event Vote(uint32 indexed gameId, uint8 guessId);
-    event GameValidated(uint32 indexed gameId);
+    event GameValidated(uint32 indexed gameId, bool player1Guessed, bool player2Guessed);
 }
