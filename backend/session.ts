@@ -22,16 +22,12 @@ const getBotPrompt = (traitsPrompt: string): string => {
 
 const seedNames = (numberOfNames: number) => {
   const names = [
-    'Gordon_Welchman',
-    'Hugh_Alexander',
-    'Stuart_Milner_Barry',
-    'Joan_Clarke',
-    'John_Tiltman',
-    'Alfred_Dillwyn_Knox',
-    'Ralph_Tester',
-    'Margaret_Rock',
-    'Mavis_Lever',
-    'Peter_Twinn'
+    'Bletchley',
+    'Enigma',
+    'Ultra',
+    'Christopher',
+    'Halting',
+    'Athena'
   ];
 
   if (numberOfNames < 0 || numberOfNames > names.length) {
