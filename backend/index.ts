@@ -62,7 +62,6 @@ class WSServer {
         const message = JSON.parse(rawMessage.toString()) as IPlayerMessage;
         if (message.type === 'chat') {
           session.addMessageToConversation({ playerId: ws.playerId!, message: message.content });
-          this.clients.forEach((c: AuthenticatedWebSocket) => c.send(userMessage('chat', { message: message.content }, ws.playerId)));
 	} else if (message.type === 'get_topic') {
           ws.send(userMessage('topic', session.getTopic()));
 	} else if (message.type === 'start_session') {
