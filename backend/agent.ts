@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import { IChatMessage } from './types/message';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
+const MESSSAGE_LENGTH_LIMIT = 100;
 export default class Agent {
   private client: OpenAI;
   private playerId: string;
@@ -16,6 +16,7 @@ export default class Agent {
     this.systemPrompt = `${systemPrompt}. Your player name/id is ${this.playerId}.\n
     The tools represent you responding or not, so do not call the same tool several times in a row - others will see you as a bot!\n
     Do not reply to your own messages.\n
+    Your messages must not be longer than ${MESSSAGE_LENGTH_LIMIT} characters.
     `;
   }
 
