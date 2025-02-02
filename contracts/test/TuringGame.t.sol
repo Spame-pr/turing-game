@@ -14,7 +14,6 @@ contract TuringGameTest is Test {
     function setUp() public {
         vm.createSelectFork(vm.rpcUrl("base"), 25788855);
         admin = makeAddr("admin");
-
         vm.prank(admin);
         turingGame = new TuringGame();
 
@@ -25,8 +24,7 @@ contract TuringGameTest is Test {
         vm.deal(player1, 1 ether);
         vm.deal(player2, 1 ether);
 
-        deal(turingGame.TURING_TOKEN(), player1, 10 ether);
-        deal(turingGame.TURING_TOKEN(), player2, 10 ether);
+        deal(turingGame.TURING_TOKEN(), player1, 10000 ether);
     }
 
     function test_createGame_success() public {
@@ -78,8 +76,15 @@ contract TuringGameTest is Test {
         vm.prank(player1);
         uint32 gameId = turingGame.createGame{value: 0.1 ether}(0.1 ether);
 
+        ITuringGame.Game memory game = turingGame.getGame(gameId);
+        assertEq(game.player1.addr, player1);
+
         vm.prank(player2);
         turingGame.joinGame{value: 0.1 ether}(gameId);
+
+        ITuringGame.Game memory game2 = turingGame.getGame(gameId);
+
+        assertEq(game2.player2.addr, player2);
 
         vm.prank(player1);
         turingGame.vote(gameId, 1);
@@ -90,5 +95,28 @@ contract TuringGameTest is Test {
 
         vm.prank(admin);
         turingGame.validateVotes(gameId, 1, 0, 0.01 ether);
+    }
+
+    function test_setMinTuringBalance_success() public {
+        vm.prank(admin);
+        turingGame.setMinTuringBalance(1 ether);
+        assertEq(turingGame.minTuringBalance(), 1 ether);
+    }
+
+    function test_withdraw_success() public {
+        vm.prank(player1);
+        uint32 gameId = turingGame.createGame{value: 0.1 ether}(0.1 ether);
+
+        ITuringGame.Game memory game = turingGame.getGame(gameId);
+        assertEq(game.player1.addr, player1);
+
+        vm.prank(player2);
+        turingGame.joinGame{value: 0.1 ether}(gameId);
+        assertEq(address(turingGame).balance, 0.2 ether);
+
+        vm.prank(admin);
+        turingGame.withdraw();
+
+        assertEq(address(turingGame).balance, 0);
     }
 }

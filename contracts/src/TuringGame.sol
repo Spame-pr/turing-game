@@ -6,14 +6,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ITuringGame.sol";
 
 contract TuringGame is ITuringGame, Ownable {
-    uint256 public minTuringBalance = 1 ether;
-    uint256 public accumulatedFees;
+    uint256 public minTuringBalance = 10000 ether;
 
     uint32 private nextGameID;
-    mapping(uint32 => Game) public games;
-
-    address public constant TURING_TOKEN = address(0x6Ee6e27a965d5566970dCfA347fB75A8C386E2e7);
-    address public constant WETH = address(0x4200000000000000000000000000000000000006);
+    mapping(uint32 => Game) private games;
+//0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+    address public constant TURING_TOKEN = address(0x52b492a33E447Cdb854c7FC19F1e57E8BfA1777D);
     uint128 public constant MIN_BET = 0.001 ether;
 
     constructor() Ownable(msg.sender) {}
@@ -91,11 +89,22 @@ contract TuringGame is ITuringGame, Ownable {
         } else if (game.player2.guessed) {
             _sendEth(game.player2.addr, totalGameBet);
         } else {
-            accumulatedFees += totalGameBet;
             _sendEth(owner(), totalGameBet);
         }
 
         emit GameValidated(gameId, game.player1.guessed, game.player2.guessed);
+    }
+
+    function getGame(uint32 gameId) public view returns (Game memory) {
+        return games[gameId];
+    }
+
+    function setMinTuringBalance(uint256 balance) onlyOwner public {
+        minTuringBalance = balance;
+    }
+
+    function withdraw() onlyOwner public {
+        _sendEth(owner(), address(this).balance);
     }
 
     function _validateVote(Game storage game) private view {
