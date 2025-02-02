@@ -54,8 +54,8 @@ const seedNames = (numberOfNames: number) => {
 
 const MAX_PLAYERS = 2;
 const BOT_NUMBER = 4;
-const SESSION_LENGTH_MS = 60 * 2 * 1000;
-const VALIDATION_TIMEOUT_MS = (60 * 3 + 10) * 1000;
+const SESSION_LENGTH_MS = 60 * 1000;
+const VALIDATION_TIMEOUT_MS = 100 * 1000;
 
 function worker(sessionId: string, cb: done) {
   const handle = async (sessionIdToHandle: string) => {
