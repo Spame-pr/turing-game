@@ -3,7 +3,7 @@
 import { IChatMessage } from './types/message';
 import Agent from './agent';
 import { AuthenticatedWebSocket } from './types/socket';
-import { sleep, userMessage } from './utils';
+import { userMessage } from './utils';
 import type { queue, done } from "fastq";
 import SessionStorage from './session-storage';
 import SessionValidator from './session-validator';
@@ -57,10 +57,6 @@ const BOT_NUMBER = 4;
 const SESSION_LENGTH_MS = 60 * 2 * 1000;
 const VALIDATION_TIMEOUT_MS = (60 * 3 + 10) * 1000;
 
-const randomDelay = (short: boolean = false) => {
-  return (short ? 2000 : 5000) + (Math.random() * (short ? 3000 : 7000));
-};
-
 function worker(sessionId: string, cb: done) {
   const handle = async (sessionIdToHandle: string) => {
     const session = await SessionStorage.getInstance().getSession(sessionIdToHandle);
@@ -71,13 +67,10 @@ function worker(sessionId: string, cb: done) {
     const conversation: IChatMessage[] = session.getConversation();
     const promises = session.getAgents().map((agent: Agent) => {
       return agent.handleConversation(conversation, (message: string, delayMs: number) => {
-        setTimeout(() => {
-          session.addMessageToConversation({ playerId: agent.getPlayerId(), message: message });
-        }, randomDelay());
+        session.addMessageToConversation({ playerId: agent.getPlayerId(), message: message });
       });
     });
     await Promise.all(promises);
-    await sleep(randomDelay(true));
     cb(null);
   };
   console.error('Going to handle session ' + sessionId);
