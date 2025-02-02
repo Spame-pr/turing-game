@@ -3,6 +3,8 @@ import { IChatMessage } from './types/message';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const MESSSAGE_LENGTH_LIMIT = 100;
+const NO_REPLY_MARKER = "<NO_REPLY>"
+
 export default class Agent {
   private client: OpenAI;
   private playerId: string;
@@ -13,9 +15,10 @@ export default class Agent {
       apiKey: OPENAI_API_KEY
     });
     this.playerId = playerId;
-    this.systemPrompt = `${systemPrompt}. Your player name/id is ${this.playerId}.\n
-    The tools represent you responding or not, so do not call the same tool several times in a row - others will see you as a bot!\n
+    this.systemPrompt = `${systemPrompt}. Your player name is ${this.playerId}.\n
     Do not reply to your own messages.\n
+    Do not prepend your messages with your name.\n
+    If you do not want to reply, put ${NO_REPLY_MARKER} in your response.\n
     Your messages must not be longer than ${MESSSAGE_LENGTH_LIMIT} characters.
     `;
   }
@@ -79,12 +82,17 @@ const tools = [
     ));
     messages = [ { role: 'system', content: this.systemPrompt }, ...messages];
     //console.error(messages)
-    const chatCompletion = await this.client.beta.chat.completions.runTools({
+    const chatCompletion = await this.client.chat.completions.create({
       messages,
       model: 'gpt-4o-mini',
-      tools: tools as any
     });
     console.error(JSON.stringify(chatCompletion));
+    const response = chatCompletion.choices[0].message.content!;
+    if (response.includes(NO_REPLY_MARKER)) {
+      console.error(`Agent ${this.getPlayerId()} does not want to respond!`)
+    } else {
+      responseCallback(response, 3000);
+    }
     return "OK";
   }
 }

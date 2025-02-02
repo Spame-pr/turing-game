@@ -31,7 +31,7 @@ class WSServer {
     });
     this.clients = new Set();
     this.initialize();
-    this.sessionStorage = new SessionStorage();
+    this.sessionStorage = SessionStorage.getInstance();
   }
 
   private async initialize(): Promise<void> {
