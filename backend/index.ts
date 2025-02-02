@@ -7,7 +7,6 @@ import { IncomingMessage } from 'http';
 import Agent from './agent';
 import { IChatMessage } from './types/message';
 import SessionStorage from './session-storage';
-import SessionValidator from './session-validator';
 import Session from './session';
 import { parse } from 'url';
 import { AuthenticatedWebSocket } from './types/socket';
@@ -64,15 +63,13 @@ class WSServer {
         if (message.type === 'chat') {
           session.addMessageToConversation({ playerId: ws.playerId!, message: message.content });
 	} else if (message.type === 'get_topic') {
-          ws.send(userMessage('topic', session.getTopic()));
+          session.notifyTopic();
 	} else if (message.type === 'start_session') {
           try {
             session.startSession();
 	  } catch (err) {
             ws.send(errorMessage('Cannot start session!'));
 	  }
-	} else if (message.type === 'validate_session') {
-          new SessionValidator().validateSession(sessionId);
 	}
       });
 
