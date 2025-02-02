@@ -15,3 +15,6 @@ export const sleep = (ms: number) => {
 };
 
 
+export const randomDelay = (short: boolean = false) => {
+  return (short ? 2000 : 5000) + (Math.random() * (short ? 3000 : 7000));
+};

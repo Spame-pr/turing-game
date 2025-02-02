@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { IChatMessage } from './types/message';
+import { sleep, randomDelay } from './utils';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const MESSSAGE_LENGTH_LIMIT = 100;
@@ -36,8 +37,10 @@ export default class Agent {
     )[] = chatMessages.map((m) => (
         { role: m.playerId === this.playerId ? 'assistant' : 'user', content: m.message, name: m.playerId }
     ));
+
     messages = [ { role: 'system', content: this.systemPrompt }, ...messages];
     try {
+      await sleep(randomDelay());
       const chatCompletion = await this.client.chat.completions.create({
         messages,
         model: 'gpt-4o-mini',
