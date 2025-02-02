@@ -15,12 +15,14 @@ export default class Agent {
       apiKey: OPENAI_API_KEY
     });
     this.playerId = playerId;
-    this.systemPrompt = `${systemPrompt}. Your player name is ${this.playerId}.\n
+    this.systemPrompt = `${systemPrompt}.\n
+    Your player name is ${this.playerId}.\n
     Do not reply to your own messages.\n
-    Do not prepend your messages with your name.\n
+    Do not put your name at the beginning of your message.\n
     If you do not want to reply, put ${NO_REPLY_MARKER} in your response.\n
     Your messages must not be longer than ${MESSSAGE_LENGTH_LIMIT} characters.
     `;
+    console.error(this.systemPrompt);
   }
 
   getPlayerId(): string {
