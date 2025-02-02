@@ -47,15 +47,19 @@ export default class SessionValidator {
   }
 
   async validateSession(sessionIdToValidate: string) {
-    const session = await this.sessionStorage.getSession(sessionIdToValidate);
-    const playerIds = session.getPlayerIds();
-    const sessionId = BigInt(session.getSessionId());
-    const player1Id = BigInt(playerIds[0]);
-    const player2Id = BigInt(playerIds[1]);
-    const gasEstimate = await this.contract['validateVotes'].estimateGas(sessionId, player1Id, player2Id, ethers.parseEther("0.00001"));
-    const adminExcess = gasEstimate * BigInt(105) / BigInt(100);
-    console.error(`sessionId=${sessionId} player1=${player1Id} player2=${player2Id} adminExcess=${adminExcess}`);
-    const result = await this.writeContract("validateVotes", sessionId, player1Id, player2Id, adminExcess);
+    try {
+      const session = await this.sessionStorage.getSession(sessionIdToValidate);
+      const playerIds = session.getPlayerIds();
+      const sessionId = BigInt(session.getSessionId());
+      const player1Id = BigInt(playerIds[0]);
+      const player2Id = BigInt(playerIds[1]);
+      const gasEstimate = await this.contract['validateVotes'].estimateGas(sessionId, player1Id, player2Id, ethers.parseEther("0.00001"));
+      const adminExcess = gasEstimate * BigInt(105) / BigInt(100);
+      console.error(`sessionId=${sessionId} player1=${player1Id} player2=${player2Id} adminExcess=${adminExcess}`);
+      const result = await this.writeContract("validateVotes", sessionId, player1Id, player2Id, adminExcess);
+    } catch (err) {
+      console.error(`Session validation tx failed!`);
+    }
   }
 }
 

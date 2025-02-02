@@ -15,11 +15,11 @@ export default class Agent {
       apiKey: OPENAI_API_KEY
     });
     this.playerId = playerId;
-    this.systemPrompt = `${systemPrompt}.\n
-    Your player name is ${this.playerId}.\n
-    Do not reply to your own messages.\n
-    Do not put your name at the beginning of your message.\n
-    If you do not want to reply, put ${NO_REPLY_MARKER} in your response.\n
+    this.systemPrompt = `${systemPrompt}.
+    Your player name is ${this.playerId}.
+    If your message is the last one in a chat, do not add more.
+    Do not put your name at the beginning of your message.
+    If you do not want to reply, put ${NO_REPLY_MARKER} in your response.
     Your messages must not be longer than ${MESSSAGE_LENGTH_LIMIT} characters.
     `;
     console.error(this.systemPrompt);
