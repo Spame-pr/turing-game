@@ -162,6 +162,12 @@ export default class Session {
     });
   }
 
+  notifyValidation(txHash: string | null) {
+    this.players.forEach((ws) => {
+      ws.send(userMessage('session_validated', { session_id: this.getSessionId(), tx_hash: txHash }));
+    });
+  }
+
   startSession() {
     if (!this.initialized) {
       throw new Error('Session not initialized!');
@@ -195,8 +201,9 @@ export default class Session {
       this.started = false;
       this.notifySessionFinish();
     }, SESSION_LENGTH_MS);
-    setTimeout(() => {
-      new SessionValidator().validateSession(this.getSessionId());
+    setTimeout(async () => {
+      const txHash = await new SessionValidator().validateSession(this.getSessionId());
+      this.notifyValidation(txHash);
     }, VALIDATION_TIMEOUT_MS)
   }
 

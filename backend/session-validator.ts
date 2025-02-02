@@ -46,7 +46,7 @@ export default class SessionValidator {
     }
   }
 
-  async validateSession(sessionIdToValidate: string) {
+  async validateSession(sessionIdToValidate: string): Promise<string | null> {
     try {
       const session = await this.sessionStorage.getSession(sessionIdToValidate);
       const playerIds = session.getPlayerIds();
@@ -57,8 +57,10 @@ export default class SessionValidator {
       const adminExcess = gasEstimate * BigInt(105) / BigInt(100);
       console.error(`sessionId=${sessionId} player1=${player1Id} player2=${player2Id} adminExcess=${adminExcess}`);
       const result = await this.writeContract("validateVotes", sessionId, player1Id, player2Id, adminExcess);
+      return result.hash;
     } catch (err) {
-      console.error(`Session validation tx failed!`);
+      console.error(`Session validation tx failed! ${err}`);
+      return null;
     }
   }
 }
