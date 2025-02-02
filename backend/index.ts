@@ -7,6 +7,7 @@ import { IncomingMessage } from 'http';
 import Agent from './agent';
 import { IChatMessage } from './types/message';
 import SessionStorage from './session-storage';
+import SessionValidator from './session-validator';
 import Session from './session';
 import { parse } from 'url';
 import { AuthenticatedWebSocket } from './types/socket';
@@ -31,7 +32,7 @@ class WSServer {
     });
     this.clients = new Set();
     this.initialize();
-    this.sessionStorage = new SessionStorage();
+    this.sessionStorage = SessionStorage.getInstance();
   }
 
   private async initialize(): Promise<void> {
@@ -70,8 +71,9 @@ class WSServer {
 	  } catch (err) {
             ws.send(errorMessage('Cannot start session!'));
 	  }
+	} else if (message.type === 'validate_session') {
+          new SessionValidator().validateSession(sessionId);
 	}
-
       });
 
       // Handle client disconnection
